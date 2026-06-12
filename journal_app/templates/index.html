@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal Manager - 光学期刊管理器</title>
+<style>
+:root{--bg:#0f1117;--card-bg:#1a1d27;--border:#2a2d37;--text:#e1e4e8;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--orange:#d29922;--red:#f85149;--purple:#a371f7;--r:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+.c{max-width:1400px;margin:0 auto;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:24px;flex-wrap:wrap;gap:12px}
+h1{font-size:24px;font-weight:700}h1 span{color:var(--accent)}
+.btn{padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:var(--card-bg);color:var(--text);cursor:pointer;font-size:13px;transition:all 0.2s;white-space:nowrap}
+.btn:hover{background:#252836;border-color:var(--accent)}
+.btn1{background:#1f6feb;border-color:#1f6feb;color:#fff}.btn1:hover{background:#388bfd}
+.btn2{background:#6e40c9;border-color:#6e40c9;color:#fff}.btn2:hover{background:#7c4dff}
+.btn-sm{padding:4px 10px;font-size:12px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r);padding:12px}.stat .v{font-size:24px;font-weight:700}.stat .l{font-size:11px;color:var(--muted)}.v1{color:var(--accent)}.v2{color:var(--green)}.v3{color:var(--purple)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 18px;border-radius:var(--r);cursor:pointer;border:1px solid transparent;background:transparent;color:var(--muted);font-size:14px}
+.tab:hover{color:var(--text)}.tab.on{color:var(--text);background:var(--card-bg);border-color:var(--border)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;margin-bottom:20px}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color 0.2s}.card:hover{border-color:var(--accent)}
+.cn{font-weight:600;font-size:14px}.cc{font-size:12px;color:var(--muted)}.cp{font-size:11px;color:var(--muted);margin-top:4px}
+.cs{display:flex;gap:10px;margin-top:8px;font-size:12px;color:var(--muted);flex-wrap:wrap}.cs b{color:var(--text)}
+.vi{color:var(--accent);font-weight:600}
+.ca{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:500}
+.b-opg{background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb44}
+.b-nature{background:#3fb95022;color:#3fb950;border:1px solid #3fb95044}
+.b-wiley{background:#d2992222;color:#d29922;border:1px solid #d2992244}
+.b-springer{background:#f0883e22;color:#f0883e;border:1px solid #f0883e44}
+.b-elsevier{background:#e85d7522;color:#e85d75;border:1px solid #e85d7544}
+.b-other{background:#a371f722;color:#a371f7;border:1px solid #a371f744}
+#apanel{display:none}#apanel.on{display:block}
+.vgroup{margin-bottom:20px}
+.vheader{background:#1f242f;border:1px solid var(--border);border-radius:var(--r);padding:10px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;transition:background 0.2s}
+.vheader:hover{background:#252d3a}
+.vheader h3{font-size:14px;color:var(--accent);margin:0}
+.vheader .vc{font-size:12px;color:var(--muted)}
+.vbody{padding:0 4px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:8px 10px;background:var(--card-bg);color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:hover td{background:#1a1d2733}
+.atitle{font-weight:500;color:var(--accent);cursor:pointer}.atitle:hover{text-decoration:underline}
+.atitle-cn{font-size:11px;color:var(--muted)}
+.aa{font-size:11px;color:var(--muted)}.ad{font-size:11px;color:var(--muted);white-space:nowrap}
+.no-data{text-align:center;padding:40px;color:var(--muted)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.dot-g{background:var(--green)}.dot-o{background:var(--orange);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ebar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card-bg);border:1px solid var(--accent);border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:12px;z-index:50;transition:transform 0.3s;box-shadow:0 4px 24px rgba(0,0,0,0.5)}
+.ebar.on{transform:translateX(-50%) translateY(0)}
+.ebar .ec{color:var(--accent);font-weight:700;font-size:16px}
+.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:100;justify-content:center;align-items:center}
+.modal-bg.on{display:flex}
+.modal{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:800px;width:90%;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:18px;margin-bottom:8px}.modal .m{font-size:12px;color:var(--muted);margin-bottom:12px;overflow-wrap:break-word}
+.modal .m-abs{font-size:13px;line-height:1.6;margin:8px 0;max-height:300px;overflow-y:auto}
+.modal .cls{float:right;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0 4px}
+.toast{position:fixed;bottom:80px;right:20px;z-index:200;padding:10px 18px;border-radius:var(--r);color:#fff;font-size:13px;opacity:0;transform:translateY(20px);transition:all 0.3s}
+.toast.on{opacity:1;transform:translateY(0)}.t-ok{background:#238636}.t-err{background:#da3633}.t-info{background:#1f6feb}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.back-btn{margin:8px 0 16px;display:none}.back-btn.on{display:block}
+</style>
+</head>
+<body>
+<div class="c">
+<header>
+<h1><span>📚</span> Journal Manager</h1>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn1" onclick="doScrapeAll()">🔄 一键爬取所有期刊</button>
+<button class="btn" onclick="showFavorites()">⭐ 收藏夹</button>
+<button class="btn" onclick="doRefresh()">🔃 刷新</button>
+</div>
+</header>
+
+<div id="statusBar" style="display:none;background:#1f242f;border:1px solid var(--accent);border-radius:var(--r);padding:10px 16px;margin-bottom:16px;align-items:center;gap:10px">
+<span class="spin"></span><span id="statusText" style="color:var(--accent);font-size:13px"></span>
+<button class="btn btn-sm" onclick="hideStatus()" style="margin-left:auto">✕</button>
+</div>
+
+<div class="stat-row" id="stats"></div>
+
+<div class="tabs">
+<button class="tab on" data-tab="journals" onclick="switchTab('journals')">📰 期刊列表</button>
+<button class="tab" data-tab="articles" onclick="switchTab('articles')" id="tabArticles">📄 文章列表</button>
+</div>
+
+<div id="jpanel">
+<div class="tabs" style="margin-bottom:12px" id="catTabs">
+<button class="tab on" data-cat="all" onclick="switchCat('all')">全部</button>
+<button class="tab" data-cat="optics" onclick="switchCat('optics')">🔬 光学</button>
+<button class="tab" data-cat="rf_microwave" onclick="switchCat('rf_microwave')">📡 射频微波</button>
+</div>
+<div class="grid" id="journalGrid"></div></div>
+
+<div id="apanel">
+<div class="back-btn" id="backBtn">
+<button class="btn" onclick="backToJournals()">← 返回期刊列表</button>
+<span id="currentJournalName" style="margin-left:12px;font-weight:600;color:var(--accent)"></span>
+</div>
+<div id="articleContent"></div>
+</div>
+</div>
+
+<div class="ebar" id="ebar">
+<span>已选 <span class="ec" id="ec">0</span> 篇</span>
+<button class="btn btn2" onclick="doExport()">📥 导出</button>
+<button class="btn" onclick="doFavorite()">⭐ 收藏</button>
+<button class="btn" onclick="doUnfavorite()">💔 取消收藏</button>
+<button class="btn" onclick="doDelete()" style="color:var(--red);border-color:var(--red)">🗑️ 删除</button>
+<button class="btn" onclick="doClear()">✕ 清除选择</button>
+</div>
+
+<div class="modal-bg" id="modalBg">
+<div class="modal">
+<button class="cls" onclick="closeModal()">&times;</button>
+<h2 id="mTitle"></h2>
+<div style="color:var(--accent);font-size:13px;margin:4px 0" id="mTitleCN"></div>
+<div class="m" id="mAuthors"></div>
+<div class="m" id="mMeta"></div>
+<a id="mURL" target="_blank" style="color:var(--accent);font-size:12px"></a>
+<div style="margin-top:12px"><h4 style="color:var(--muted);font-size:12px">摘要 (EN)</h4><div class="m-abs" id="mAbs"></div></div>
+<div style="margin-top:8px"><h4 style="color:var(--muted);font-size:12px">摘要 (CN)</h4><div class="m-abs" id="mAbsCN"></div></div>
+<div style="margin-top:12px;display:flex;gap:8px">
+<button class="btn btn-sm" id="btnTT" onclick="transModal('title')" style="display:none">翻译标题</button>
+<button class="btn btn-sm" id="btnTA" onclick="transModal('abstract')" style="display:none">翻译摘要</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let S=new Set,CM=null,CJ=null,VCOLLAPSED={},CUR_CAT="all",ALL_JOURNALS=[];
+function $(id){return document.getElementById(id)}
+function fd(d){if(!d)return"";try{return new Date(d).toLocaleDateString("zh-CN")}catch(e){return(d||"").substring(0,10)}}
+function esc(s){if(!s)return"";var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function showT(msg,tp){var t=$("toast");t.textContent=msg;t.className="toast t-"+(tp||"info")+" on";setTimeout(function(){t.classList.remove("on")},3000)}
+
+function switchTab(tab){
+	document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.dataset.tab===tab)});
+	$("jpanel").style.display=tab==="journals"?"block":"none";
+	$("apanel").classList.toggle("on",tab==="articles");
+	if(tab==="journals"){loadJournals();$("catTabs").style.display="flex"}else{$("catTabs").style.display="none"}
+}
+function backToJournals(){CJ=null;$("backBtn").classList.remove("on");$("currentJournalName").textContent="";$("articleContent").innerHTML="";switchTab("journals")}
+
+function switchCat(cat){
+	CUR_CAT=cat;
+	document.querySelectorAll("#catTabs .tab").forEach(function(t){t.classList.toggle("on",t.dataset.cat===cat)});
+	renderJournals()
+}
+function getFilteredJournals(){
+	if(CUR_CAT==="all")return ALL_JOURNALS;
+	return ALL_JOURNALS.filter(function(j){return j.category===CUR_CAT})
+}
+
+async function loadJournals(){
+	try{var r=await fetch("/api/journals");ALL_JOURNALS=await r.json();renderStats();renderJournals()}catch(e){showT("加载失败","err")}
+}
+function renderStats(){
+	var jj=ALL_JOURNALS,t=0,n=0,op=0,rf=0;
+	jj.forEach(function(j){t+=j.total_articles||0;n+=j.new_articles||0;if(j.category==="optics")op++;else if(j.category==="rf_microwave")rf++});
+	$("stats").innerHTML='<div class="stat"><div class="v v1">'+(op+rf)+'</div><div class="l">期刊总数</div></div><div class="stat"><div class="v v2">'+t+'</div><div class="l">文章总数</div></div><div class="stat"><div class="v v3">'+n+'</div><div class="l">新文章</div></div><div class="stat"><div class="v" style="color:#58a6ff">'+op+'</div><div class="l">🔬 光学</div></div><div class="stat"><div class="v" style="color:#d29922">'+rf+'</div><div class="l">📡 射频微波</div></div>'
+}
+function renderJournals(){
+	var h="",jj=getFilteredJournals();
+	jj.forEach(function(j){
+	var b=j.type==="opg"?"b-opg":j.type==="nature"?"b-nature":j.type==="wiley"?"b-wiley":j.type==="springer"?"b-springer":j.type==="elsevier"?"b-elsevier":"b-other";
+	var sd=j.enabled?'<span class="dot dot-g"></span>':'<span class="dot dot-o"></span>';
+	var vi=j.latest_volume?'<span class="vi">V'+j.latest_volume+(j.latest_issue?' I'+j.latest_issue:'')+'</span>':'';
+	h+='<div class="card"><div class="cn">'+sd+esc(j.name)+'</div>';
+	h+='<div class="cc">'+esc(j.name_cn||"")+' <span class="badge '+b+'">'+(j.publisher||j.type).toUpperCase()+'</span></div>';
+	h+='<div class="cs"><b>文章:</b> '+(j.total_articles||0)+' <b>新:</b> '+(j.new_articles||0)+' '+vi+'</div>';
+	if(j.last_scraped)h+='<div class="cp">上次爬取: '+fd(j.last_scraped)+'</div>';
+	h+='<div class="ca"><button class="btn btn-sm" onclick="viewJournal(\''+j.id+'\',\''+esc(j.name)+'\')">📄 查看文章</button>';
+		h+='<button class="btn btn-sm btn1" onclick="doScrape(\''+j.id+'\',this)">🔄 爬取最新</button>';if(j.new_articles>0)h+='<button class="btn btn-sm" onclick="doMarkRead(\''+j.id+'\',this)">✅ 已读</button>';h+='</div></div>';
+	});
+	$("journalGrid").innerHTML=h||'<div class="no-data">暂无此类期刊</div>'
+}
+
+async function viewJournal(jid,jname){
+	CJ=jid;switchTab("articles");$("tabArticles").classList.add("on");$("backBtn").classList.add("on");
+	$("currentJournalName").textContent=jname;
+	$("articleContent").innerHTML='<div class="no-data"><span class="spin"></span> 加载中...</div>';
+	try{var r=await fetch("/api/articles/by-volume?journal_id="+jid);var d=await r.json();renderVolumes(d.volumes)}catch(e){$("articleContent").innerHTML='<div class="no-data">加载失败</div>'}
+}
+function renderVolumes(volumes){
+	var vk=Object.keys(volumes);
+	if(vk.length===0){$("articleContent").innerHTML='<div class="no-data">📭 该期刊暂无文章，请先爬取</div>';return}
+	var h='<div style="margin-bottom:12px;color:var(--muted)">共 '+vk.length+' 个卷</div>';
+	vk.forEach(function(v){
+	var vdata=volumes[v];var issues=vdata.issues;var ik=Object.keys(issues);
+	var vtotal=0;ik.forEach(function(iss){vtotal+=issues[iss].length});
+	var vid=CJ+"_"+v;var vcol=VCOLLAPSED[vid]||false;
+	h+='<div class="vgroup"><div class="vheader" onclick="toggleVolume(\''+vid+'\')">';
+	h+='<h3>'+(vcol?"▶":"▼")+' Volume '+v+' <span style="font-weight:400;color:var(--muted)">('+vtotal+' 篇, '+ik.length+' 期)</span></h3>';
+	h+='<span class="vc">点击展开/收起</span></div>';
+	h+='<div class="vbody" id="vbody_'+vid+'" style="'+(vcol?"display:none":"")+'">';
+	ik.forEach(function(iss){
+	var arts=issues[iss];var iid=vid+"_i"+iss;var icol=VCOLLAPSED[iid]||false;
+	var issLabel=iss==="__none__"?"未分期":("Issue "+iss);
+	h+='<div class="vgroup" style="margin-left:8px;margin-bottom:4px">';
+	h+='<div class="vheader" style="background:#222836;padding:6px 12px" onclick="toggleVolume(\''+iid+'\')">';
+	h+='<h4 style="font-size:13px;color:var(--green);margin:0">'+(icol?"▶":"▼")+' '+issLabel+' <span style="font-weight:400;color:var(--muted)">('+arts.length+' 篇)</span></h4>';
+	h+='</div>';
+	h+='<div class="vbody" id="vbody_'+iid+'" style="'+(icol?"display:none":"")+'">';
+	h+='<table class="tbl"><thead><tr><th style="width:30px"><input type="checkbox" onchange="toggleVolCk(\''+iid+'\',this.checked)"></th><th>标题</th><th style="width:200px">作者</th><th style="width:100px">日期</th></tr></thead><tbody>';
+	arts.forEach(function(a){var ck=S.has(a.id)?"checked":"";
+	h+='<tr><td><input type="checkbox" class="acb" value="'+a.id+'" '+ck+' onchange="togArt('+a.id+',this.checked)"></td>';
+	h+='<td><div class="atitle" onclick="openArt('+a.id+')">'+(a.favorite?"⭐ ":"")+esc(a.title||"")+'</div>';
+	if(a.title_cn)h+='<div class="atitle-cn">'+esc(a.title_cn)+'</div>';h+='</td>';
+	h+='<td class="aa">'+esc((a.authors||"").substring(0,80))+'</td>';
+	h+='<td class="ad">'+fd(a.pub_date||a.scraped_at)+'</td></tr>';});
+	h+='</tbody></table></div></div>';});
+	h+='</div></div>';});
+	$("articleContent").innerHTML=h;upEBar()
+}
+function toggleVolume(cid){VCOLLAPSED[cid]=!VCOLLAPSED[cid];var b=$("vbody_"+cid);if(b){b.style.display=VCOLLAPSED[cid]?"none":"";var h=b.previousElementSibling;if(h){var hd=h.querySelector("h3")||h.querySelector("h4");if(hd)hd.innerHTML=hd.innerHTML.replace(/[▶▼]/,"")}}}
+function toggleVolCk(cid,ck){var b=$("vbody_"+cid);if(!b)return;b.querySelectorAll(".acb").forEach(function(c){c.checked=ck;if(ck)S.add(parseInt(c.value));else S.delete(parseInt(c.value))});upEBar()}
+
+function togArt(id,ck){if(ck)S.add(id);else S.delete(id);upEBar()}
+function upEBar(){var n=S.size;$("ec").textContent=n;$("ebar").className="ebar"+(n>0?" on":"")}
+function doClear(){S.clear();upEBar();document.querySelectorAll(".acb").forEach(function(c){c.checked=false})}
+async function doMarkRead(jid,btn){
+	if(btn){btn.disabled=true;btn.textContent="⏳"}
+	try{await fetch("/api/journals/"+jid+"/mark-read",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+	doRefresh()}catch(e){showT("操作失败","err");if(btn)btn.disabled=false}
+}
+
+async function doExport(){
+	if(S.size===0){showT("请先选择文章","err");return}
+	try{var r=await fetch("/api/articles/export-md",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:Array.from(S)})});var d=await r.json();
+	if(d.markdown){var b=new Blob([d.markdown],{type:"text/markdown;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="articles_"+new Date().toISOString().slice(0,10)+".md";a.click();showT("已导出 "+d.count+" 篇","ok")}else{showT("导出失败","err")}}catch(e){showT("出错","err")}
+}
+async function doDelete(){
+	if(S.size===0){showT("请先选择文章","err");return}
+	if(!confirm("确定要删除 "+S.size+" 篇文章吗？此操作不可撤销。"))return
+	try{var r=await fetch("/api/articles/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:Array.from(S)})});var d=await r.json();
+	if(d.success){showT(d.message,"ok");S.clear();upEBar();doRefresh()}else{showT(d.error||"删除失败","err")}}catch(e){showT("出错","err")}
+}
+async function doFavorite(){
+	if(S.size===0){showT("请先选择文章","err");return}
+	try{var r=await fetch("/api/articles/favorite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:Array.from(S),favorite:true})});var d=await r.json();
+	if(d.success){showT(d.message,"ok");doRefresh()}else{showT(d.error||"收藏失败","err")}}catch(e){showT("出错","err")}
+}
+async function doUnfavorite(){
+	if(S.size===0){showT("请先选择文章","err");return}
+	try{var r=await fetch("/api/articles/favorite",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:Array.from(S),favorite:false})});var d=await r.json();
+	if(d.success){showT(d.message,"ok");doRefresh()}else{showT(d.error||"取消失败","err")}}catch(e){showT("出错","err")}
+}
+async function showFavorites(){
+	CJ=null;switchTab("articles");$("tabArticles").classList.add("on");$("backBtn").classList.add("on");$("currentJournalName").textContent="⭐ 收藏夹";
+	$("articleContent").innerHTML='<div class="no-data"><span class="spin"></span> 加载中...</div>';
+	try{var r=await fetch("/api/articles/favorites");var d=await r.json();if(!d.articles.length){$("articleContent").innerHTML='<div class="no-data">暂无收藏</div>';return}
+	var g={};d.articles.forEach(function(a){var jn=a.journal_name||"未知";var vol=a.volume||"Unknown";var iss=a.issue||"__none__";if(!g[jn])g[jn]={};var vg=g[jn];if(!vg[vol])vg[vol]={issues:{}};if(!vg[vol].issues[iss])vg[vol].issues[iss]=[];vg[vol].issues[iss].push(a)});
+	var h="";Object.keys(g).sort().forEach(function(jn){h+='<h2 style="margin:16px 0 8px;color:var(--accent)">'+esc(jn)+'</h2>';
+	Object.keys(g[jn]).sort(function(a,b){return (parseInt(b)||0)-(parseInt(a)||0)}).forEach(function(vol){
+	var vdata=g[jn][vol];var ik=Object.keys(vdata.issues);var vtotal=0;ik.forEach(function(iss){vtotal+=vdata.issues[iss].length});
+	var vid="fav_"+jn.replace(/[^a-zA-Z0-9]/g,"_")+"_"+vol;var vcol=VCOLLAPSED[vid]||false;
+	h+='<div class="vgroup" style="margin-left:0"><div class="vheader" onclick="toggleVolume(\''+vid+'\')"><h3>'+(vcol?"▶":"▼")+' Vol.'+vol+' <span style="font-weight:400;color:var(--muted)">('+vtotal+' 篇, '+ik.length+' 期)</span></h3></div>';
+	h+='<div class="vbody" id="vbody_'+vid+'" style="'+(vcol?"display:none":"")+'">';
+	ik.sort(function(a,b){return (parseInt(b)||0)-(parseInt(a)||0)}).forEach(function(iss){
+	var arts=vdata.issues[iss];var iid=vid+"_i"+iss;var icol=VCOLLAPSED[iid]||false;
+	var issLabel=iss==="__none__"?"未分期":("Issue "+iss);
+	h+='<div class="vgroup" style="margin-left:8px;margin-bottom:4px"><div class="vheader" style="background:#222836;padding:6px 12px" onclick="toggleVolume(\''+iid+'\')"><h4 style="font-size:13px;color:var(--green);margin:0">'+(icol?"▶":"▼")+' '+issLabel+' <span style="font-weight:400;color:var(--muted)">('+arts.length+' 篇)</span></h4></div>';
+	h+='<div class="vbody" id="vbody_'+iid+'" style="'+(icol?"display:none":"")+'"><table class="tbl"><thead><tr><th style="width:30px"><input type="checkbox" onchange="toggleVolCk(\''+iid+'\',this.checked)"></th><th>标题</th><th style="width:180px">作者</th><th style="width:100px">日期</th></tr></thead><tbody>';
+	arts.forEach(function(a){var ck=S.has(a.id)?"checked":"";h+='<tr><td><input type="checkbox" class="acb" value="'+a.id+'" '+ck+' onchange="togArt('+a.id+',this.checked)"></td>';
+	h+='<td><div class="atitle" onclick="openArt('+a.id+')">⭐ '+esc(a.title||"")+'</div>';if(a.title_cn)h+='<div class="atitle-cn">'+esc(a.title_cn)+'</div>';h+='</td>';
+	h+='<td class="aa">'+esc((a.authors||"").substring(0,80))+'</td><td class="ad">'+fd(a.pub_date||a.scraped_at)+'</td></tr>';});
+	h+='</tbody></table></div></div>';});
+	h+='</div></div>';});});
+	$("articleContent").innerHTML=h;upEBar()}catch(e){$("articleContent").innerHTML='<div class="no-data">加载失败</div>'}
+}
+
+async function openArt(id){
+	try{var r=await fetch("/api/articles/"+id);var a=await r.json();if(!a||a.error){showT("未找到","err");return}
+	CM=a;$("mTitle").textContent=a.title||"";$("mTitleCN").textContent=a.title_cn||"";$("mAuthors").textContent="作者: "+(a.authors||"未知");
+	$("mMeta").textContent=(a.journal_name||"")+(a.volume?" · Vol."+a.volume+(a.issue?" Issue "+a.issue:""):"")+" · "+fd(a.pub_date||a.scraped_at);
+	$("mURL").href=a.url||"#";$("mURL").textContent=a.url||"";$("mAbs").textContent=a.abstract||"暂无摘要";$("mAbsCN").textContent=a.abstract_cn||"暂无中文摘要";
+	$("btnTT").style.display=a.title_cn?"none":"inline-block";$("btnTA").style.display=(a.abstract_cn||!a.abstract)?"none":"inline-block";$("modalBg").classList.add("on")}catch(e){showT("加载失败","err")}
+}
+function closeModal(){$("modalBg").classList.remove("on");CM=null}
+
+async function transModal(type){
+	if(!CM)return;var t=type==="title"?CM.title:CM.abstract;if(!t)return;var btn=$(type==="title"?"btnTT":"btnTA");btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+	try{var r=await fetch("/api/translate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t,type:type,article_id:CM.id})});var d=await r.json();
+	if(d.translation){if(type==="title"){$("mTitleCN").textContent=d.translation;CM.title_cn=d.translation}else{$("mAbsCN").textContent=d.translation;CM.abstract_cn=d.translation}showT("翻译完成","ok")}else{showT("翻译失败","err")}}catch(e){showT("出错","err")}
+	btn.disabled=false;btn.innerHTML=type==="title"?"翻译标题":"翻译摘要";btn.style.display="none"
+}
+
+var STATUS_POLL=null;
+function showStatus(msg,type){var b=$("statusBar");var t=$("statusText");if(b&&t){b.style.display="flex";t.textContent=msg;b.style.borderColor=type==="err"?"var(--red)":type==="ok"?"var(--green)":"var(--accent)"}}
+function hideStatus(){var b=$("statusBar");if(b)b.style.display="none"}
+
+function startStatusPoll(){
+	if(STATUS_POLL)return;
+	STATUS_POLL=setInterval(async function(){
+	try{var r=await fetch("/api/scrape-status");var s=await r.json();
+	var keys=Object.keys(s);if(keys.length===0){showStatus("就绪","ok");return}
+	for(var i=0;i<keys.length;i++){var st=s[keys[i]];
+	if(st.status==="running"||st.status==="translating"){
+	var jn=st.journal||keys[i];showStatus((jn||keys[i])+": "+st.step,"running");return}
+	if(st.status==="completed"||st.status==="error"){
+	showStatus(st.status==="completed"?"上次爬取完成":"上次爬取出错","ok");return}}
+	showStatus("就绪","ok")
+	}catch(e){}},3000)}
+startStatusPoll();
+
+async function doScrape(jid,btn){
+	if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> 爬取中...'}
+	try{var r=await fetch("/api/scrape/"+jid,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});var d=await r.json();
+	if(d.success){showT(d.message,"ok")}else{
+	if(d.active){var aks=Object.keys(d.active);if(aks.length){var ast=d.active[aks[0]];showT("已有任务: "+(ast.journal||aks[0])+" — "+ast.step,"err")}else{showT(d.error,"err")}}
+	else{showT(d.error||"失败","err")}}}
+	catch(e){showT("出错","err")}
+	if(btn){btn.disabled=false;btn.innerHTML="🔄 爬取最新"}doRefresh()
+}
+async function doScrapeAll(){
+	var btns=document.querySelectorAll(".btn1");btns.forEach(function(b){b.disabled=true});
+	try{var r=await fetch("/api/scrape-all",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});var d=await r.json();if(d.results){var ok=d.results.filter(function(x){return x.success}).length;showT("爬取完成: "+ok+" 成功","ok")}}catch(e){showT("出错","err")}
+	btns.forEach(function(b){b.disabled=false});doRefresh()
+}
+async function doRefresh(){await loadJournals();if(CJ)viewJournal(CJ,$("currentJournalName").textContent)}
+$("modalBg").addEventListener("click",function(e){if(e.target===this)closeModal()});
+document.addEventListener("DOMContentLoaded",function(){doRefresh();setInterval(loadJournals,300000)});
+</script>
+</body>
+</html>

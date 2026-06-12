@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+journal_data.db
+.DS_Store
+Thumbs.db
+DrissionPageDocs*/
+.env
+*.tmp
+.vscode/
+.idea/
