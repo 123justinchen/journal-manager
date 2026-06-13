@@ -4,13 +4,17 @@ Web-based academic journal scraper with Chinese translation. Tracks 29 journals 
 
 ## Screenshots
 
-### Main Page
+### Main Page — Journal Browser
 
 ![Main Page](Screenshot1.jpg)
 
-### Article List
+### Article List — Volume Grouped View
 
 ![Article List](Screenshot2.jpg)
+
+### Article Detail — Abstract & Translation
+
+![Article Detail](Screenshot3.jpg)
 
 ## Features
 
@@ -20,6 +24,7 @@ Web-based academic journal scraper with Chinese translation. Tracks 29 journals 
 - **Intra-issue pagination** for IEEE journals, ensuring all articles in large issues are captured
 - **Chinese translation** via DeepSeek API (titles + abstracts)
 - **Category filter** — split into 🔬 Optics (20) and 📡 RF/Microwave (9)
+- **Article detail** — click any article for full abstract, authors, and side-by-side Chinese translation
 - **Favorites** — bookmark articles; viewable in a dedicated favorites page
 - **Markdown export** — select articles and export as `.md`
 - **Delete / Mark-read** — manage your article collection
