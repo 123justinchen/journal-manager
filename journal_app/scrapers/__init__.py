@@ -33,6 +33,7 @@ from scrapers.elsevier.olt import scraper as olt
 from scrapers.oea import scraper as oea
 from scrapers.ieee.tmtt import scraper as tmtt
 from scrapers.ieee.mwtl import scraper as mwtl
+from scrapers.ieee.mwcl import scraper as mwcl
 from scrapers.ieee.tap import scraper as tap
 from scrapers.ieee.thz import scraper as thz
 from scrapers.ieee.awpl import scraper as awpl
@@ -52,7 +53,7 @@ JOURNAL_CATEGORIES = {
     "elight": "optics", "ole": "optics", "olt": "optics",
     "oea": "optics",
     # 射频微波 (RF/Microwave/Antennas)
-    "tmtt": "rf_microwave", "mwtl": "rf_microwave", "tap": "rf_microwave",
+    "tmtt": "rf_microwave", "mwtl": "rf_microwave", "mwcl": "rf_microwave", "tap": "rf_microwave",
     "thz": "rf_microwave", "awpl": "rf_microwave", "microwave_mag": "rf_microwave",
     "iet_map": "rf_microwave", "jemwa": "rf_microwave",
 }
@@ -73,8 +74,8 @@ ALL_SCRAPERS = {
     "lpr": lpr, "nanoph": nanoph, "aom": aom, "iet_map": iet_map,
     # RSS (3)
     "elight": elight, "ole": ole, "olt": olt,
-    # IEEE (6)
-    "tmtt": tmtt, "mwtl": mwtl, "tap": tap, "thz": thz,
+    # IEEE (7)
+    "tmtt": tmtt, "mwtl": mwtl, "mwcl": mwcl, "tap": tap, "thz": thz,
     "awpl": awpl, "microwave_mag": microwave_mag,
     # T&F (1)
     "jemwa": jemwa,

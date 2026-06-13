@@ -9,8 +9,8 @@ class _MWTLScraper(BaseScraper):
     publisher = "IEEE"
     journal_type = "ieee"
     code = "mwtl"
-    punumber = "7260"
-    list_url = "https://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=7260"
+    punumber = "9944983"
+    list_url = "https://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=9944983"
 
     def scrape(self):
         return ieee_browser_scrape(self)

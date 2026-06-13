@@ -356,60 +356,85 @@ def ieee_browser_scrape(self):
         pre_m = re.search(r"<pre>(.*?)</pre>", raw, re.DOTALL)
         issues = json.loads(pre_m.group(1) if pre_m else raw)
         latest = issues[0]
+        # Skip "PP" (early access) placeholder issues — pick first real issue
+        for candidate in issues:
+            cv = str(candidate.get("volume", ""))
+            ci = str(candidate.get("issue", ""))
+            if cv not in ("PP", "99", "") and ci not in ("99", ""):
+                latest = candidate
+                break
         vol = str(latest.get("volume", ""))
         iss = str(latest.get("issue", ""))
         isnumber = str(latest.get("issueNumber", ""))
         logger.info("[%s] V%s I%s (isnumber=%s)", self.code.upper(), vol, iss, isnumber)
 
-        # ── Step 2: TOC page ───────────────────────────────────────
-        toc_url = (
-            f"https://ieeexplore.ieee.org/xpl/tocresult.jsp"
-            f"?isnumber={isnumber}&punumber={punum}"
-        )
-        logger.info("[%s] Opening TOC", self.code.upper())
-        page.get(toc_url)
-        page.wait.doc_loaded()
+        # ── Step 2: TOC pages (URL-driven pagination) ──────────────
+        def _load_toc_page(pn):
+            """Load a TOC page by page number and return HTML."""
+            url = (
+                f"https://ieeexplore.ieee.org/xpl/tocresult.jsp"
+                f"?isnumber={isnumber}&punumber={punum}&pageNumber={pn}"
+                f"&rowsPerPage=100"
+            )
+            page.get(url)
+            page.wait.doc_loaded()
+            for _ in range(15):
+                time.sleep(1)
+                try:
+                    html = page.html
+                except Exception:
+                    continue
+                if len(re.findall(r'/document/(\d+)', html)) > 5 and len(html) > 50000:
+                    return html
+            return page.html
 
-        html = ""
-        for _ in range(15):
-            time.sleep(1)
-            try:
-                html = page.html
-            except Exception:
-                continue
-            if len(re.findall(r'/document/(\d+)', html)) > 10 and len(html) > 80000:
+        def _extract_entries(html):
+            """Extract article links from TOC HTML."""
+            soup = BeautifulSoup(html, "html.parser")
+            page_entries = []
+            for a in soup.find_all("a", href=re.compile(r"/document/(\d+)")):
+                art_num = re.search(r"/document/(\d+)", a["href"]).group(1)
+                title = self._clean(a.get_text())
+                if len(title) < 10:
+                    p = a.parent
+                    for _ in range(6):
+                        if p is None:
+                            break
+                        h = p.find(["h2", "h3", "h4"])
+                        if h:
+                            title = self._clean(h.get_text())
+                            if len(title) >= 10:
+                                break
+                        p = p.parent
+                if len(title) < 10:
+                    continue
+                page_entries.append({
+                    "title": title,
+                    "url": f"https://ieeexplore.ieee.org/document/{art_num}",
+                })
+            return page_entries
+
+        logger.info("[%s] Opening TOC (paginated)", self.code.upper())
+        seen_urls = set()
+        entries = []
+        MAX_PAGES = 20
+
+        for pn in range(1, MAX_PAGES + 1):
+            html = _load_toc_page(pn)
+            new_entries = _extract_entries(html)
+            added = 0
+            for e in new_entries:
+                if e["url"] not in seen_urls:
+                    seen_urls.add(e["url"])
+                    entries.append(e)
+                    added += 1
+            logger.info("[%s] TOC page %d: %d articles (%d new)",
+                        self.code.upper(), pn, len(new_entries), added)
+            if added == 0:
                 break
 
-        soup = BeautifulSoup(html, "html.parser")
-
-        # ── Step 3: Extract article links ──────────────────────────
-        seen = set()
-        entries = []
-        for a in soup.find_all("a", href=re.compile(r"/document/(\d+)")):
-            art_num = re.search(r"/document/(\d+)", a["href"]).group(1)
-            if art_num in seen:
-                continue
-            seen.add(art_num)
-            title = self._clean(a.get_text())
-            if len(title) < 10:
-                p = a.parent
-                for _ in range(6):
-                    if p is None:
-                        break
-                    h = p.find(["h2", "h3", "h4"])
-                    if h:
-                        title = self._clean(h.get_text())
-                        if len(title) >= 10:
-                            break
-                    p = p.parent
-            if len(title) < 10:
-                continue
-            entries.append({
-                "title": title,
-                "url": f"https://ieeexplore.ieee.org/document/{art_num}",
-            })
-
-        logger.info("[%s] Found %d articles in TOC", self.code.upper(), len(entries))
+        logger.info("[%s] Found %d articles in TOC (%d pages)",
+                    self.code.upper(), len(entries), pn)
 
         # ── Step 4: Detail pages ───────────────────────────────────
         today = datetime.now().strftime("%Y-%m-%d")
