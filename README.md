@@ -1,4 +1,4 @@
-# Journal Manager V2
+# Journal Manager
 
 Web-based academic journal scraper with Chinese translation. Tracks 29 journals across optics and RF/microwave engineering.
 
