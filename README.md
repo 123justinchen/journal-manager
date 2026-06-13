@@ -1,6 +1,6 @@
 # Journal Manager V2
 
-Web-based academic journal scraper with Chinese translation. Tracks 28 journals across optics and RF/microwave engineering.
+Web-based academic journal scraper with Chinese translation. Tracks 29 journals across optics and RF/microwave engineering.
 
 ## Screenshots
 
@@ -19,7 +19,7 @@ Web-based academic journal scraper with Chinese translation. Tracks 28 journals 
 - **IEEE journals** use shared DrissionPage TOC scraper (REST API → rendered TOC → detail pages)
 - **Intra-issue pagination** for IEEE journals, ensuring all articles in large issues are captured
 - **Chinese translation** via DeepSeek API (titles + abstracts)
-- **Category filter** — split into 🔬 Optics (20) and 📡 RF/Microwave (8)
+- **Category filter** — split into 🔬 Optics (20) and 📡 RF/Microwave (9)
 - **Favorites** — bookmark articles; viewable in a dedicated favorites page
 - **Markdown export** — select articles and export as `.md`
 - **Delete / Mark-read** — manage your article collection
