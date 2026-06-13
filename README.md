@@ -2,11 +2,22 @@
 
 Web-based academic journal scraper with Chinese translation. Tracks 28 journals across optics and RF/microwave engineering.
 
+## Screenshots
+
+### Main Page
+
+![Main Page](Screenshot1.jpg)
+
+### Article List
+
+![Article List](Screenshot2.jpg)
+
 ## Features
 
 - **Scrape** current issues from 28 journals across 7 publishers
 - **Browser automation** via DrissionPage — bypasses Cloudflare on T&F, Elsevier, Wiley
 - **IEEE journals** use shared DrissionPage TOC scraper (REST API → rendered TOC → detail pages)
+- **Intra-issue pagination** for IEEE journals, ensuring all articles in large issues are captured
 - **Chinese translation** via DeepSeek API (titles + abstracts)
 - **Category filter** — split into 🔬 Optics (20) and 📡 RF/Microwave (8)
 - **Favorites** — bookmark articles; viewable in a dedicated favorites page
@@ -31,6 +42,16 @@ python -m journal_app.app
 # Open http://127.0.0.1:5050
 ```
 
+## Usage Tips
+
+### Anti-Scraping Note
+
+IEEE Xplore has IP-based rate limiting. When scraping, you may encounter empty results (0 articles) due to temporary blocks. If this happens:
+
+- **Retry with intervals** — click the "Scrape Latest" button a few times, waiting 30-60 seconds between attempts
+- **Use a browser** — the app uses DrissionPage (real Chrome) to render pages, which helps bypass basic detection
+- **Scrape one journal at a time** — avoid triggering aggressive rate limits by not running "Scrape All" in rapid succession
+
 ## Journals
 
 | Category | Publisher | Journals |
@@ -41,7 +62,7 @@ python -m journal_app.app
 | 🔬 Optics | Elsevier | Optics & Laser Technology, Optics and Lasers in Engineering |
 | 🔬 Optics | Springer | eLight |
 | 🔬 Optics | OEA | Opto-Electronic Advances |
-| 📡 RF/MW | IEEE | TAP, TMTT, MWTL, AWPL, THz, Microwave Magazine |
+| 📡 RF/MW | IEEE | TAP, TMTT, MWTL, MWCL, AWPL, THz, Microwave Magazine |
 | 📡 RF/MW | Wiley | IET Microwaves, Antennas and Propagation |
 | 📡 RF/MW | T&F | J. Electromagnetic Waves and Applications |
 
